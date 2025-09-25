@@ -165,45 +165,48 @@
       const resetBtn = document.getElementById("resetBtn");
       let isOut = false;
 
-      function makeCandles(n=7) {
-        candles.innerHTML="";
-        for(let i=0;i<n;i++){
-          const c=document.createElement("div"); c.className="candle";
-          const wick=document.createElement("div"); wick.className="wick"; c.appendChild(wick);
-          const flame=document.createElement("div"); flame.className="flame"; c.appendChild(flame);
+      function makeCandles(n = 7) {
+        candles.innerHTML = "";
+        for (let i = 0; i < n; i++) {
+          const c = document.createElement("div"); c.className = "candle";
+          const wick = document.createElement("div"); wick.className = "wick"; c.appendChild(wick);
+          const flame = document.createElement("div"); flame.className = "flame"; c.appendChild(flame);
           candles.appendChild(c);
         }
       }
 
       function blowOut() {
-        if(isOut) return;
-        isOut=true; cake.classList.add("out");
-        candles.querySelectorAll(".flame").forEach(f=>f.style.opacity=0);
-     function relight() {
-        isOut=false; cake.classList.remove("out"); makeCandles();
-        if(musicStarted && bgMusic.paused) bgMusic.play().catch(()=>{});
+        if (isOut) return;
+        isOut = true;
+        cake.classList.add("out");
+        candles.querySelectorAll(".flame").forEach(f => f.style.opacity = 0);
+      }
+
+      function relight() {
+        isOut = false;
+        cake.classList.remove("out");
+        makeCandles();
+        if (musicStarted && bgMusic.paused) bgMusic.play().catch(() => {});
       }
 
       // Desktop click
       cake.addEventListener("click", blowOut);
 
       // Shake detection (mobile)
-      let lastX=0, lastY=0, lastZ=0, shakeThreshold=15;
-      window.addEventListener("devicemotion", (e)=>{
+      let lastX = 0, lastY = 0, lastZ = 0, shakeThreshold = 15;
+      window.addEventListener("devicemotion", (e) => {
         let acc = e.accelerationIncludingGravity;
-        if(!acc) return;
-        let delta = Math.abs(acc.x-lastX)+Math.abs(acc.y-lastY)+Math.abs(acc.z-lastZ);
-        if(delta>shakeThreshold) blowOut();
-        lastX=acc.x; lastY=acc.y; lastZ=acc.z;
+        if (!acc) return;
+        let delta = Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY) + Math.abs(acc.z - lastZ);
+        if (delta > shakeThreshold) blowOut();
+        lastX = acc.x; lastY = acc.y; lastZ = acc.z;
       });
 
       resetBtn.addEventListener("click", relight);
-      window.addEventListener("keydown",(e)=>{if(e.key==="r"||e.key==="R") relight();});
+      window.addEventListener("keydown", (e) => { if (e.key === "r" || e.key === "R") relight(); });
+
       makeCandles();
     }
   </script>
 </body>
-
 </html>
-
-
