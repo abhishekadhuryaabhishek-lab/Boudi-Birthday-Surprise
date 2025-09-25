@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birthday Surprise</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; margin: 0; overflow: hidden; }
+    .page { display: none; width: 100%; height: 100vh; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .page.active { display: flex; }
+    #countdown-number { font-size: 15vw; animation: pop 1s ease-in-out infinite; }
+    @keyframes pop { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+    /* Gift Box */
+    #gift-container { cursor: pointer; display: flex; flex-direction: column; align-items: center; z-index: 5; }
+    .gift { position: relative; width: 200px; height: 150px; }
+    .gift-lid { position: absolute; width: 220px; height: 50px; background: #e040fb; top: 0; left: -10px; border-radius: 6px; transition: all 0.8s ease-in-out; transform-origin: top center; z-index: 2;}
+    .gift-box { position: absolute; width: 200px; height: 120px; background: #d500f9; top: 40px; border-radius: 6px; z-index:1; }
+    .gift-ribbon-v, .gift-ribbon-h { position: absolute; background: #ffc400; }
+    .gift-ribbon-v { width: 20px; height: 100%; left: 50%; transform: translateX(-50%); top:0; border-radius:4px; }
+    .gift-ribbon-h { width: 100%; height: 20px; top: 50%; transform: translateY(-50%); left:0; border-radius:4px; }
+    #gift-container.open .gift-lid { transform: translateY(-150px) rotate(-20deg); opacity: 0; }
+
+    /* Sparkles */
+    #sparkle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 90; pointer-events: none; }
+
+    /* Cake Page */
+    #page3 { background: linear-gradient(180deg,#071029 0%, #0f1724 60%); color: #fff; }
+    .wrap{max-width:920px;width:100%;padding:22px}
+    .card{background:rgba(255,255,255,0.05);border-radius:18px;padding:26px;box-shadow:0 8px 30px rgba(2,6,23,0.6);backdrop-filter: blur(6px)}
+    .header-text h1{font-family:'Great Vibes',cursive;font-size:clamp(20px,5vw,44px);margin:0; color: #fce7f3;}
+    .header-text p { font-size: clamp(14px, 3vw, 20px); margin: 0; }
+    .stage{display:flex;gap:28px;align-items:center;justify-content:center;flex-wrap:wrap;padding:18px}
+    .cake-wrap{position:relative;width:420px;min-height:320px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px}
+    .plate{width:360px;height:22px;background:#ddd;border-radius:12px;position:absolute;bottom:0}
+    .cake{width:320px;background:linear-gradient(180deg,#df6f8f,#c85a79);border-radius:18px;padding:22px;position:relative;}
+    .frosting{position:absolute;top:-18px;left:8px;right:8px;height:36px;background:#ffd6e0;border-radius:18px;}
+    .cake-layer{height:120px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;}
+    .candles{position:absolute;top:-34px;left:50%;transform:translateX(-50%);display:flex;gap:12px}
+    .candle{width:12px;height:46px;background:#fff;border-radius:4px;position:relative;}
+    .wick{position:absolute;top:-6px;width:2px;height:8px;background:#222;left:50%;transform:translateX(-50%)}
+    .flame{position:absolute;top:-24px;left:50%;transform:translateX(-50%);width:14px;height:26px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #fff68a, #ff9f3b);}
+
+    @media(max-width:520px){.cake-wrap{width:320px}}
+  </style>
+</head>
+<body class="text-white">
+  <!-- Countdown -->
+  <div id="page1" class="page active bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500">
+    <div id="countdown-number" class="font-bold">3</div>
+    <p class="text-2xl mt-4">Please Wait...</p>
+  </div>
+
+  <!-- Gift -->
+  <div id="page2" class="page" style="background: radial-gradient(circle,#2c2c54 0%,#1a1a2e 100%)">
+    <div id="gift-container">
+      <div class="gift">
+        <div class="gift-lid"><div class="gift-ribbon-h"></div><div class="gift-ribbon-v"></div></div>
+        <div class="gift-box"><div class="gift-ribbon-h"></div><div class="gift-ribbon-v"></div></div>
+      </div>
+      <p class="mt-6 text-lg text-gray-200 animate-pulse">Click the gift to reveal the surprise!</p>
+    </div>
+  </div>
+
+  <!-- Sparkles -->
+  <canvas id="sparkle-canvas" aria-hidden="true"></canvas>
+  <audio id="bg-music" src="https://cdn.pixabay.com/download/audio/2022/02/21/audio_a01a305b3b.mp3" preload="auto" loop></audio>
+
+  <!-- Cake Page -->
+  <div id="page3" class="page" aria-hidden="true">
+    <div class="wrap">
+      <div class="card">
+        <header class="flex justify-between items-center mb-4 header-text">
+          <div>
+            <h1>🎉 Happy Birthday Boudi 🎂</h1>
+            <p>Many many happy returns of the day. Khub valo theko sustho theko 💖</p>
+          </div>
+          <button id="resetBtn" class="btn bg-yellow-300 px-3 py-1 rounded-lg">Relight</button>
+        </header>
+        <div class="stage">
+          <div class="cake-wrap" id="cakeWrap">
+            <div class="plate"></div>
+            <div class="cake" id="cake">
+              <div class="frosting"></div>
+              <div class="cake-layer">Make a wish and blow the candles!</div>
+              <div class="candles" id="candles"></div>
+            </div>
+          </div>
+        </div>
+        <p class="info text-sm mt-4">Tip: On mobile, shake your device to blow out the candles. On desktop, click the cake. Press 'R' to relight.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const page1 = document.getElementById("page1");
+    const page2 = document.getElementById("page2");
+    const page3 = document.getElementById("page3");
+    const giftContainer = document.getElementById("gift-container");
+    const bgMusic = document.getElementById("bg-music");
+    const canvas = document.getElementById("sparkle-canvas");
+    const ctx = canvas.getContext("2d");
+    let sparkles = [];
+    let musicStarted = false;
+
+    // Countdown
+    let count = 3;
+    document.getElementById("countdown-number").textContent = count;
+    const countdownInterval = setInterval(() => {
+      count--;
+      if (count > 0) document.getElementById("countdown-number").textContent = count;
+      else {
+        clearInterval(countdownInterval);
+        page1.classList.remove("active");
+        page2.classList.add("active");
+      }
+    }, 1000);
+
+    // Sparkles
+    function setupCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; ctx.globalCompositeOperation = 'lighter'; }
+    function createSparkle(x,y) {
+      const size = Math.random() * 3 + 1;
+      const hue = Math.floor(Math.random() * 80) + 260;
+      return { x, y, size, color: `hsl(${hue},100%,70%)`, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, life: 80 };
+    }
+    function triggerSparkles() { for (let i = 0; i < 100; i++) sparkles.push(createSparkle(window.innerWidth/2, window.innerHeight/2)); }
+    function animateSparkles() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      sparkles.forEach((s,i) => {
+        s.x += s.vx; s.y += s.vy; s.life--;
+        ctx.globalAlpha = s.life/80;
+        ctx.beginPath(); ctx.arc(s.x,s.y,s.size,0,2*Math.PI); ctx.fillStyle=s.color; ctx.fill();
+        if(s.life<=0) sparkles.splice(i,1);
+      });
+      ctx.globalAlpha=1;
+      requestAnimationFrame(animateSparkles);
+    }
+
+    // Start music on first click
+    document.body.addEventListener("click", () => {
+      if (!musicStarted) { bgMusic.play().catch(()=>{}); musicStarted = true; }
+    }, { once: true });
+
+    // Gift click
+    giftContainer.addEventListener("click", () => {
+      giftContainer.classList.add("open");
+      triggerSparkles();
+      setTimeout(() => {
+        page2.classList.remove("active");
+        page3.classList.add("active");
+        initializeCake();
+      }, 1200);
+    });
+
+    window.addEventListener("resize", setupCanvas);
+    setupCanvas();
+    animateSparkles();
+
+    // Cake & Candles
+    function initializeCake() {
+      const candles = document.getElementById("candles");
+      const cake = document.getElementById("cake");
+      const resetBtn = document.getElementById("resetBtn");
+      let isOut = false;
+
+      function makeCandles(n=7) {
+        candles.innerHTML="";
+        for(let i=0;i<n;i++){
+          const c=document.createElement("div"); c.className="candle";
+          const wick=document.createElement("div"); wick.className="wick"; c.appendChild(wick);
+          const flame=document.createElement("div"); flame.className="flame"; c.appendChild(flame);
+          candles.appendChild(c);
+        }
+      }
+
+      function blowOut() {
+        if(isOut) return;
+        isOut=true; cake.classList.add("out");
+        candles.querySelectorAll(".flame").forEach(f=>f.style.opacity=0);
+        if(!bgMusic.paused) { bgMusic.pause(); bgMusic.currentTime=0; }
+      }
+
+      function relight() {
+        isOut=false; cake.classList.remove("out"); makeCandles();
+        if(musicStarted && bgMusic.paused) bgMusic.play().catch(()=>{});
+      }
+
+      // Desktop click
+      cake.addEventListener("click", blowOut);
+
+      // Shake detection (mobile)
+      let lastX=0, lastY=0, lastZ=0, shakeThreshold=15;
+      window.addEventListener("devicemotion", (e)=>{
+        let acc = e.accelerationIncludingGravity;
+        if(!acc) return;
+        let delta = Math.abs(acc.x-lastX)+Math.abs(acc.y-lastY)+Math.abs(acc.z-lastZ);
+        if(delta>shakeThreshold) blowOut();
+        lastX=acc.x; lastY=acc.y; lastZ=acc.z;
+      });
+
+      resetBtn.addEventListener("click", relight);
+      window.addEventListener("keydown",(e)=>{if(e.key==="r"||e.key==="R") relight();});
+      makeCandles();
+    }
+  </script>
+</body>
+</html>
